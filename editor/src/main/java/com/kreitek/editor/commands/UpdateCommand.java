@@ -8,6 +8,7 @@ public class UpdateCommand implements Command {
     private final String text;
     private final int lineNumber;
 
+
     public UpdateCommand(String text, int lineNumber) {
         this.text = text;
         this.lineNumber = lineNumber;
@@ -15,9 +16,13 @@ public class UpdateCommand implements Command {
 
     @Override
     public void execute(ArrayList<String> documentLines) {
-        if (documentLines.size() > lineNumber)
+        if (documentLines.size() > lineNumber) {
+
             documentLines.set(lineNumber, text);
-        else
+        } else {
             documentLines.add(text);
+        }
     }
+
+
 }

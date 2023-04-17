@@ -1,6 +1,7 @@
 package com.kreitek.editor.commands;
 
 import com.kreitek.editor.BadCommandException;
+import com.sun.source.tree.BreakTree;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +43,10 @@ public class CommandParser {
 
             return new String[]{"u", arg2, arg3};
         }
+        if (commandLine.startsWith("undo")) {
+            return new String[]{"undo"};
+        }
+
         return new String[]{commandLine};
     }
     

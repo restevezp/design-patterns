@@ -1,9 +1,11 @@
 package com.kreitek.editor;
 
-import com.kreitek.editor.commands.CommandFactory;
+import com.kreitek.editor.commands.*;
+import com.kreitek.editor.memento.Caretaker;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
 
 public class ConsoleEditor implements Editor {
     public static final String TEXT_RESET = "\u001B[0m";
@@ -16,17 +18,25 @@ public class ConsoleEditor implements Editor {
     public static final String TEXT_CYAN = "\u001B[36m";
     public static final String TEXT_WHITE = "\u001B[37m";
 
-    private final CommandFactory commandFactory = new CommandFactory();
+    private final Caretaker caretaker = new Caretaker();
+    private final CommandFactory commandFactory = new CommandFactory(caretaker);
     private ArrayList<String> documentLines = new ArrayList<String>();
-
     @Override
     public void run() {
         boolean exit = false;
+        //guardar el estado actual del documento antes de ejecutar siguiente comando
+        caretaker.save(documentLines);
         while (!exit) {
             String commandLine = waitForNewCommand();
             try {
-                Command command = commandFactory.getCommand(commandLine);
+                //caretaker.save(documentLines);
+                Command command = commandFactory.getCommand(commandLine, documentLines);
                 command.execute(documentLines);
+                if (!(command instanceof UndoCommand)) {
+                    caretaker.save(documentLines);
+                }
+
+
             } catch (BadCommandException e) {
                 printErrorToConsole("Bad command");
             } catch (ExitException e) {
@@ -36,6 +46,7 @@ public class ConsoleEditor implements Editor {
             showHelp();
         }
     }
+
 
     private void showDocumentLines(ArrayList<String> textLines) {
         if (textLines.size() > 0){
@@ -61,9 +72,10 @@ public class ConsoleEditor implements Editor {
     }
 
     private void showHelp() {
-        printLnToConsole("To add new line -> a \"your text\"");
-        printLnToConsole("To update line  -> u [line number] \"your text\"");
-        printLnToConsole("To delete line  -> d [line number]");
+        printLnToConsole("To add new line    -> a \"your text\"");
+        printLnToConsole("To update line     -> u [line number] \"your text\"");
+        printLnToConsole("To delete line     -> d [line number]");
+        printLnToConsole("To undo last line  -> undo ");
     }
 
     private void printErrorToConsole(String message) {
